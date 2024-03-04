@@ -12,3 +12,21 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+model Pokemon {
+  id     String @id
+  name   String
+  height Int
+  weight Int
+  teamId Int?
+
+  Team Team? @relation(fields: [teamId], references: [id])
+}
+
+model Team {
+  id       Int       @id @default(autoincrement())
+  owner    String
+  pokemons Pokemon[]
+
+  @@unique([owner])
+}
