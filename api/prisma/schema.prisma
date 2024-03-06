@@ -13,20 +13,18 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Pokemon {
-  id     String @id
-  name   String
-  height Int
-  weight Int
-  teamId Int?
+model User {
+  id       String @id @default(uuid())
+  username String
+  teams    Team[]
 
-  Team Team? @relation(fields: [teamId], references: [id])
+  @@unique([username])
 }
 
 model Team {
-  id       Int       @id @default(autoincrement())
+  id       Int    @id @default(autoincrement())
   owner    String
-  pokemons Pokemon[]
+  pokemons Int[]
 
-  @@unique([owner])
+  user User @relation(fields: [owner], references: [username])
 }
