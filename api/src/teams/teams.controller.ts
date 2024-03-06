@@ -18,7 +18,6 @@ export class TeamsController {
 
   @Post()
   create(@Body() body: CreateTeamBody) {
-    const { username, pokemons } = body;
-    return this.teamsService.create({ username, pokemons });
+    return this.teamsService.create(body);
   }
 }
