@@ -12,80 +12,109 @@ export class TeamsService {
   ) {}
 
   async create(body: CreateTeamBody) {
-    const { username, pokemons } = body;
-    const responses = await Promise.all(
-      pokemons.map((pokemon) =>
-        lastValueFrom(
-          this.httpService.get(`https://pokeapi.co/api/v2/pokemon/${pokemon}`),
-        ).then((response) => response.data.id),
-      ),
-    );
-    return await this.teamsRepository.create({ username, pokemons: responses });
+    try {
+      const { user, team } = body;
+      const responses = await Promise.all(
+        team.map((pokemon) =>
+          lastValueFrom(
+            this.httpService.get(
+              `https://pokeapi.co/api/v2/pokemon/${pokemon}`,
+            ),
+          )
+            .then((response) => response.data.id)
+            .catch(() => {
+              throw new Error(`Pokémon de nome ${pokemon} não encontrado.`);
+            }),
+        ),
+      );
+      return await this.teamsRepository.create({ user, team: responses });
+    } catch (error) {
+      return { error: error.message };
+    }
   }
 
   async findAll() {
-    const registry = await this.teamsRepository.findAll();
+    try {
+      const registry = await this.teamsRepository.findAll();
 
-    const teams = await Promise.all(
-      registry.map(async (team) => {
-        const pokemons = await Promise.all(
-          team.pokemons.map((pokemon: number) =>
-            lastValueFrom(
-              this.httpService.get(
-                `https://pokeapi.co/api/v2/pokemon/${pokemon}`,
-              ),
-            ).then((response) => {
-              return {
-                id: response.data.id,
-                name: response.data.name,
-                weight: response.data.weight,
-                height: response.data.height,
-              };
-            }),
-          ),
-        );
+      const teams = await Promise.all(
+        registry.map(async (team) => {
+          const pokemons = await Promise.all(
+            team.pokemons.map((pokemon: number) =>
+              lastValueFrom(
+                this.httpService.get(
+                  `https://pokeapi.co/api/v2/pokemon/${pokemon}`,
+                ),
+              )
+                .then((response) => {
+                  return {
+                    id: response.data.id,
+                    name: response.data.name,
+                    weight: response.data.weight,
+                    height: response.data.height,
+                  };
+                })
+                .catch(() => {
+                  throw new Error(`Pokémon de id ${pokemon} não encontrado.`);
+                }),
+            ),
+          );
 
-        return {
-          id: team.id,
+          return {
+            id: team.id,
+            owner: team.owner,
+            pokemons,
+          };
+        }),
+      );
+
+      const response = {};
+
+      teams.map((team) => {
+        response[team.id] = {
           owner: team.owner,
-          pokemons,
+          pokemons: team.pokemons,
         };
-      }),
-    );
+      });
 
-    const response = {};
-
-    teams.map((team) => {
-      response[team.id] = {
-        owner: team.owner,
-        pokemons: team.pokemons,
-      };
-    });
-
-    return response;
+      return response;
+    } catch (error) {
+      return { error: error.message };
+    }
   }
 
   async findOne(id: number) {
-    const registry = await this.teamsRepository.findOne(id);
+    try {
+      const registry = await this.teamsRepository.findOne(id);
 
-    const team = await Promise.all(
-      registry.pokemons.map((pokemon: number) =>
-        lastValueFrom(
-          this.httpService.get(`https://pokeapi.co/api/v2/pokemon/${pokemon}`),
-        ).then((response) => {
-          return {
-            id: response.data.id,
-            name: response.data.name,
-            weight: response.data.weight,
-            height: response.data.height,
-          };
-        }),
-      ),
-    );
+      if (!registry) {
+        return { error: 'Time não encontrado.' };
+      }
 
-    return {
-      owner: registry.owner,
-      pokemons: team,
-    };
+      // Requisições para a PokéAPI
+      const team = await Promise.all(
+        registry.pokemons.map((pokemon: number) =>
+          lastValueFrom(
+            this.httpService.get(
+              `https://pokeapi.co/api/v2/pokemon/${pokemon}`,
+            ),
+          ).then((response) => {
+            return {
+              id: response.data.id,
+              name: response.data.name,
+              weight: response.data.weight,
+              height: response.data.height,
+            };
+          }),
+        ),
+      );
+
+      return {
+        owner: registry.owner,
+        pokemons: team,
+      };
+    } catch (error) {
+      return { error: error.message };
+    }
   }
 }

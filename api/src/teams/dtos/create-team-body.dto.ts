@@ -7,7 +7,7 @@ export class CreateTeamBody {
   @IsNotEmpty({
     message: 'Você precisa informar um nome de usuário.',
   })
-  username: string;
+  user: string;
 
   @ArrayNotEmpty({
     message: 'Você precisa informar ao menos um Pokémon.',
@@ -15,5 +15,5 @@ export class CreateTeamBody {
   @IsNotEmpty({
     message: 'Você precisa informar os Pokémons do time.',
   })
-  pokemons: number[];
+  team: number[];
 }

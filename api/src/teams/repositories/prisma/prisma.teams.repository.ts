@@ -10,22 +10,24 @@ export class PrismaTeamsRepository implements TeamsRepository {
   async create(body: CreateTeamBody): Promise<any> {
     try {
       const user = await this.prisma.user.findUnique({
-        where: { username: body.username },
+        where: { username: body.user },
       });
 
       if (!user) {
         const createdUser = await this.prisma.user.create({
           data: {
-            username: body.username,
+            username: body.user,
             teams: {
               create: {
-                pokemons: body.pokemons,
+                pokemons: body.team,
               },
             },
           },
         });
 
-        return createdUser;
+        return {
+          message: `Usuário ${createdUser.username} e time registrados com sucesso.`,
+        };
       }
 
       const updatedUser = await this.prisma.user.update({
@@ -33,13 +35,15 @@ export class PrismaTeamsRepository implements TeamsRepository {
         data: {
           teams: {
             create: {
-              pokemons: body.pokemons,
+              pokemons: body.team,
             },
           },
         },
       });
 
-      return updatedUser;
+      return {
+        message: `Time registrado para o usuário ${updatedUser.username}.`,
+      };
     } catch (error) {
       return error;
     }
@@ -58,8 +62,6 @@ export class PrismaTeamsRepository implements TeamsRepository {
       const team = await this.prisma.team.findUnique({
         where: { id },
       });
-
-      if (!team) return 'Team not found!';
 
       return team;
     } catch (error) {
