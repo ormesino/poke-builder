@@ -19,7 +19,7 @@ docker compose up -d -V --build
 Após isso, deve-se executar um comando no _container_ da API para realizar a migração da estrutura do banco de dados do Prisma para o _container_ do banco de dados PostgreSQL. ISso será feito a partir do seguinte comando:
 
 ```bash
-docker exec -it poke-builder-api-1 npx prisma migrate dev 
+docker exec -it poke-builder-api-1 npx prisma migrate dev --name init
 ```
 
 ## Utilização
