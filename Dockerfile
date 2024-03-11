@@ -12,6 +12,4 @@ RUN npm run prisma:generate
 
 EXPOSE 3000
 
-RUN npx prisma migrate dev --name init
-
 CMD [ "node", "dist/main.js" ]
