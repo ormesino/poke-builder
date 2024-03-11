@@ -4,6 +4,7 @@ import { AppService } from './app.service';
 import { TeamsModule } from './teams/teams.module';
 
 @Module({
+  // Importação do módulo TeamsModule
   imports: [TeamsModule],
   controllers: [AppController],
   providers: [AppService],

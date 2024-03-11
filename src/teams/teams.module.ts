@@ -9,6 +9,8 @@ import { TeamsService } from './teams.service';
 @Module({
   imports: [HttpModule],
   controllers: [TeamsController],
+
+  // Injeção de dependências
   providers: [
     TeamsService,
     PrismaService,

@@ -7,12 +7,14 @@ import { TeamsRepository } from '../teams.repository';
 export class PrismaTeamsRepository implements TeamsRepository {
   constructor(private prisma: PrismaService) {}
 
+  // Método para registro de um time utilizando o Prisma
   async create(body: CreateTeamBody): Promise<any> {
     try {
       const user = await this.prisma.user.findUnique({
         where: { username: body.user },
       });
 
+      // Se o usuário não existir, ele é criado junto com o time
       if (!user) {
         const createdUser = await this.prisma.user.create({
           data: {
@@ -30,6 +32,7 @@ export class PrismaTeamsRepository implements TeamsRepository {
         };
       }
 
+      // Se o usuário já existir, o time é registrado para ele
       const updatedUser = await this.prisma.user.update({
         where: { username: user.username },
         data: {
@@ -49,6 +52,7 @@ export class PrismaTeamsRepository implements TeamsRepository {
     }
   }
 
+  // Método para listagem de todos os times registrados no banco de dados
   async findAll(): Promise<any> {
     try {
       return await this.prisma.team.findMany();
@@ -57,6 +61,7 @@ export class PrismaTeamsRepository implements TeamsRepository {
     }
   }
 
+  // Método para busca de um time específico no banco de dados
   async findOne(id: number): Promise<any> {
     try {
       const team = await this.prisma.team.findUnique({
