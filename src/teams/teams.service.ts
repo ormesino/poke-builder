@@ -41,6 +41,10 @@ export class TeamsService {
       // Busca no banco de dados
       const registry = await this.teamsRepository.findAll();
 
+      if (!registry.length) {
+        return { error: 'Nenhum time encontrado.' };
+      }
+
       // Requisições para a PokéAPI para cada time
       const teams = await Promise.all(
         registry.map(async (team) => {
